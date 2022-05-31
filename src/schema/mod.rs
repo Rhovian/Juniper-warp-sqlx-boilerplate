@@ -1,12 +1,8 @@
-mod health;
+mod query;
 use juniper::{EmptyMutation, EmptySubscription, RootNode};
 
-type Schema = RootNode<'static, health::HealthQuery, EmptyMutation, EmptySubscription>;
+type Schema = RootNode<'static, query::Query, EmptyMutation, EmptySubscription>;
 
 pub fn build_schema() -> Schema {
-    Schema::new(
-        health::HealthQuery,
-        EmptyMutation::new(),
-        EmptySubscription::new(),
-    )
+    Schema::new(query::Query, EmptyMutation::new(), EmptySubscription::new())
 }
