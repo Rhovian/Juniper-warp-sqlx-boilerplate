@@ -1,7 +1,13 @@
+use crate::schema;
 use serde_json::json;
 use warp::filters::BoxedFilter;
+use warp::http::Response;
 use warp::reply::json;
 use warp::{Filter, Rejection, Reply};
+
+#[derive(Clone, Copy, Debug)]
+struct Context;
+impl juniper::Context for Context {}
 
 async fn health() -> Result<impl Reply, Rejection> {
     Ok(json(&json!({
@@ -9,8 +15,23 @@ async fn health() -> Result<impl Reply, Rejection> {
     })))
 }
 
-pub(super) fn make_routes() -> BoxedFilter<(impl Reply,)> {
-    let h = warp::path::end().and_then(health);
+async fn home() -> Result<impl Reply, Rejection> {
+    Ok(Response::builder()
+        .header("content-type", "text/html")
+        .body("<html><h1>juniper_warp</h1><div>visit <a href=\"/graphiql\">/graphiql</a></html>"))
+}
 
-    h.boxed()
+pub(super) fn make_routes() -> BoxedFilter<(impl Reply,)> {
+    let state = warp::any().map(|| ());
+
+    let graphql_filter = juniper_warp::make_graphql_filter(schema::build_schema(), state.boxed());
+
+    let home = warp::path::end().and_then(home);
+    let health = warp::path("health").and_then(health);
+    let graphiql = warp::path("graphiql").and(juniper_warp::graphiql_filter("/graphql", None));
+
+    home.or(health)
+        .or(graphiql)
+        .or(warp::path("graphql").and(graphql_filter))
+        .boxed()
 }
