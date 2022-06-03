@@ -1,13 +1,10 @@
 use crate::schema;
+use schema::context::Context;
 use serde_json::json;
 use warp::filters::BoxedFilter;
 use warp::http::Response;
 use warp::reply::json;
 use warp::{Filter, Rejection, Reply};
-
-#[derive(Clone, Copy, Debug)]
-struct Context;
-impl juniper::Context for Context {}
 
 async fn health() -> Result<impl Reply, Rejection> {
     Ok(json(&json!({
@@ -21,8 +18,8 @@ async fn home() -> Result<impl Reply, Rejection> {
         .body("<html><h1>juniper_warp</h1><div>visit <a href=\"/graphiql\">/graphiql</a></html>"))
 }
 
-pub(super) fn make_routes() -> BoxedFilter<(impl Reply,)> {
-    let state = warp::any().map(|| ());
+pub(super) fn make_routes(ctx: Context) -> BoxedFilter<(impl Reply,)> {
+    let state = warp::any().map(move || ctx.clone());
 
     let graphql_filter = juniper_warp::make_graphql_filter(schema::build_schema(), state.boxed());
 
