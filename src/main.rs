@@ -2,7 +2,6 @@ mod environment;
 mod schema;
 mod server;
 
-use clap::Parser;
 use dotenv::dotenv;
 use std::env;
 
@@ -20,10 +19,7 @@ async fn main() -> anyhow::Result<()> {
 
     let db = dotenv::var("DATABASE_URL").unwrap();
 
-    let env = environment::Environment::new(
-        &db,
-    )
-    .await?;
+    let env = environment::Environment::new(&db).await?;
     let context = schema::context::Context::new(env).await?;
 
     server::start(([127, 0, 0, 1], 3030), context).await;

@@ -9,7 +9,7 @@ impl Query {
     async fn health(&self) -> bool {
         true
     }
-    async fn getUsers(&self, ctx: &Context) -> bool {
+    async fn getUsers(&self, _ctx: &Context) -> bool {
         false
     }
 }
