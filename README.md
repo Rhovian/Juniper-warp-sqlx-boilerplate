@@ -1,1 +1,1 @@
-# Rust | Juniper | GraphQL | Supabase 
+# Rust | Juniper | GraphQL | Sqlx  | Warp
